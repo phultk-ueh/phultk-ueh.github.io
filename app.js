@@ -237,6 +237,7 @@ function renderCharts() {
   renderHeDaoTaoChart();
   renderHocHamChart();
   renderNhomChart();
+  renderRecruitmentSplitChart();
 }
 
 function renderBarChart() {
@@ -462,6 +463,78 @@ function renderNhomChart() {
               return [`${ctx.label}: ${ctx.raw} (${pct}%)`, desc];
             }
           }
+        }
+      }
+    }
+  });
+}
+
+function renderRecruitmentSplitChart() {
+  const ctx = document.getElementById('chart-recruitment-split').getContext('2d');
+
+  // Lọc khoa có đề xuất tuyển > 0, sắp xếp giảm dần, top 12
+  const sorted = [...DATA.khoa_data]
+    .filter(k => (k.tong_de_xuat || 0) > 0)
+    .sort((a, b) => (b.tong_de_xuat || 0) - (a.tong_de_xuat || 0))
+    .slice(0, 12);
+
+  const labels = sorted.map(k => shortenName(k.don_vi));
+  const coHuu = sorted.map(k => k.de_xuat_co_huu || 0);
+  const dongCoHuu = sorted.map(k => k.de_xuat_dong_co_huu || 0);
+
+  if (chartInstances.recruitmentSplit) chartInstances.recruitmentSplit.destroy();
+  chartInstances.recruitmentSplit = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Cơ hữu',
+          data: coHuu,
+          backgroundColor: 'rgba(0, 93, 105, 0.85)',
+          borderColor: 'rgba(0, 93, 105, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.75,
+        },
+        {
+          label: 'Đồng cơ hữu',
+          data: dongCoHuu,
+          backgroundColor: 'rgba(243, 111, 50, 0.85)',
+          borderColor: 'rgba(243, 111, 50, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.75,
+        },
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { padding: 14, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} người`,
+            footer: (items) => {
+              const total = items.reduce((s, i) => s + (i.raw || 0), 0);
+              return `Tổng tuyển: ${total} người`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          beginAtZero: true,
+          grid: { color: 'rgba(0,50,58,0.07)' },
+          ticks: { precision: 0 }
+        },
+        y: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { size: 10 } }
         }
       }
     }

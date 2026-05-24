@@ -1,6 +1,7 @@
 # Mô tả dữ liệu và Mapping
 
-> Tất cả file dưới đây đều có link mở xem trực tiếp trên Google Sheets.
+> Tất cả file dưới đây có link mở xem trực tiếp trên Google Sheets.
+> **Truy cập bằng email UEH** (`@ueh.edu.vn`) để được cấp quyền xem.
 
 ## 1. Tổng quan dữ liệu đầu vào
 
@@ -32,9 +33,11 @@
 
 ---
 
-## 3. Mapping chi tiết từng file
+## 3. Xử lý dữ liệu
 
-### `01-quymo-sinhvien-dh.xlsx` → sheet **Quy mô sinh viên**
+### 3.1. Mapping chi tiết từng file
+
+#### `01-quymo-sinhvien-dh.xlsx` → sheet **Quy mô sinh viên**
 
 | Cột nguồn | Cột đích | Phép biến đổi |
 |---|---|---|
@@ -45,7 +48,7 @@
 
 **Lưu ý:** bỏ dòng cuối `CỘNG` của file nguồn để tránh tính trùng tổng.
 
-### `02-hocphan-sotiet-2025.xlsx` + `03-monhoc-khoa-phutrach.xlsx` → sheet **Phụ lục 2. DS môn học 2025**
+#### `02-hocphan-sotiet-2025.xlsx` + `03-monhoc-khoa-phutrach.xlsx` → sheet **Phụ lục 2. DS môn học 2025**
 
 | Cột nguồn (file) | Cột đích | Phép biến đổi |
 |---|---|---|
@@ -53,13 +56,13 @@
 | `03`: Khoa (lookup theo Mã HP) | Đơn vị phụ trách | Join với 02 trên `Mã HP`. File 03 đã có tên canonical sẵn. |
 | (suy luận) | Ghi chú | Tự gắn `"Tính định biên"` nếu Đơn vị là Khoa / Viện / Trung tâm / Phòng dạy học; trừ admin (Ban GH, Văn phòng, Phòng Chăm sóc). |
 
-### `04-ctdt-co-phankhoa.xlsx` → sheet **Chuongtrinhdaotao**
+#### `04-ctdt-co-phankhoa.xlsx` → sheet **Chuongtrinhdaotao**
 
 | Cột nguồn | Cột đích | Phép biến đổi |
 |---|---|---|
 | Stt, Mã chương trình, Tên chương trình, Mã ngành, Tên ngành, Lĩnh vực, Trường thành viên, Khoa/Viện, Năm tuyển sinh, Trình độ, Loại hình, Hình thức đào tạo | 13 cột tương ứng | Sao chép; Khoa/Viện chuẩn hoá về canonical |
 
-### `06-hocvien-ncs-sdh.xlsx` + `04-ctdt-co-phankhoa.xlsx` → sheet **Quy mô SĐH**
+#### `06-hocvien-ncs-sdh.xlsx` + `04-ctdt-co-phankhoa.xlsx` → sheet **Quy mô SĐH**
 
 | Cột nguồn (HT_NCS) | Cột đích | Phép biến đổi |
 |---|---|---|
@@ -68,13 +71,13 @@
 | (count) | Quy_mô_ThS, Quy_mô_TS | Đếm số học viên đang học theo (mã ngành × trình độ). |
 | (join với 04 theo mã ngành) | Đơn vị quản lý, Ngành, Số chương trình | Lấy Tên ngành + Khoa/Viện đại diện. |
 
-### `07-quymo-nhansu-gv.xlsx` → sheet **Quy mô giảng viên**
+#### `07-quymo-nhansu-gv.xlsx` → sheet **Quy mô giảng viên**
 
 | Cột nguồn | Cột đích | Phép biến đổi |
 |---|---|---|
 | 22 cột chuẩn (Mã quản lý, Họ tên, … Tình trạng làm việc) | 22 cột tương ứng (giữ format 100%) | Parse số (Mã quản lý, CMND, Năm TN, ĐT); parse ngày (Ngày sinh); parse bool (Giới tính). Mã quản lý chuẩn hoá bỏ đuôi `.0` để join ổn định với 08. |
 
-### `08-donvi-giangday.xlsx` → sheet **Đơn vị giảng dạy**
+#### `08-donvi-giangday.xlsx` → sheet **Đơn vị giảng dạy**
 
 | Cột nguồn | Cột đích | Phép biến đổi |
 |---|---|---|
@@ -82,9 +85,7 @@
 | Mã quản lý | Mã quản lý | Parse int. Khoá join với 07. |
 | Đơn vị giảng dạy | Đơn vị giảng dạy | Sao chép trực tiếp |
 
----
-
-## 4. Bảng tra tên đơn vị (canonical map)
+### 3.2. Bảng tra tên đơn vị (canonical map)
 
 Nhiều file nguồn có tên đơn vị ở dạng ngắn ("Khoa Kế toán"), trong khi format target dùng tên có prefix mã trường thành viên ("KD - Khoa Kế toán"). Pipeline quét file 03 và 08 để xây bảng tra:
 
