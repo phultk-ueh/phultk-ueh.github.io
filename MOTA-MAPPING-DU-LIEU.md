@@ -1,22 +1,38 @@
 # Mô tả dữ liệu và Mapping
 
-> Tất cả file bên dưới đều có link mở xem trực tiếp trên trình duyệt (qua Office Online Viewer).
-> Nguồn host: <https://phultk-ueh.github.io/data/>
+> Tất cả file dưới đây đều có link mở xem trực tiếp trên Google Sheets.
 
-## 1. Tổng quan 8 file nguồn
+## 1. Tổng quan dữ liệu đầu vào
 
 | STT | File | Mô tả | Đơn vị cung cấp | Sheet | Header row | Sheet đầu ra | Tình trạng | Ghi chú |
 |---:|---|---|---|---|---:|---|---|---|
-| 1 | [01-quymo-sinhvien-dh.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F01-quymo-sinhvien-dh.xlsx) | Quy mô sinh viên đại học (ĐHCQ, VLVH, CTLK) | Ban Đào tạo | Sheet1 | 3 | Quy mô sinh viên | Dùng | |
-| 2 | [02-hocphan-sotiet-2025.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F02-hocphan-sotiet-2025.xlsx) | Học phần & số tiết 2025 | Ban Đào tạo | Sheet 1 | 1 | Phụ lục 2. DS môn học 2025 | Dùng | Chưa có phân Khoa — ghép với file 03 theo Mã HP. |
-| 3 | [03-monhoc-khoa-phutrach.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F03-monhoc-khoa-phutrach.xlsx) | Mã HP → Khoa phụ trách | Ban Đào tạo | Sheet1 | 1 | Phụ lục 2. DS môn học 2025 | Dùng | Có sẵn tên canonical "PREFIX - Khoa…". Cũng là nguồn tên đơn vị chuẩn hoá. |
-| 4 | [04-ctdt-co-phankhoa.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F04-ctdt-co-phankhoa.xlsx) | CTĐT có phân Khoa (146 CT) | Ban Bảo đảm chất lượng - Phát triển chương trình | Chuongtrinhdaotao | 1 | Chuongtrinhdaotao | Dùng | Mã CT khác với của Sau Đại học. Khoa/Viện có sẵn tên prefix. |
-| 5 | [05-ctdt-khong-phankhoa.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F05-ctdt-khong-phankhoa.xlsx) | CTĐT không phân Khoa (mẫu Bộ) | Ban Sau Đại học | CTDT | 2 | — | Tham khảo | Dữ liệu CTĐT đã có đầy đủ trong file 04. |
-| 6 | [06-hocvien-ncs-sdh.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F06-hocvien-ncs-sdh.xlsx) | Học viên Cao học & NCS (~9.600 dòng) | Ban Sau Đại học | HT_NCS | 2 | Quy mô SĐH | Dùng | Đếm 'Đang học' theo mã ngành (7 ký tự đầu); leading 8 = ThS, 9 = TS. |
-| 7 | [07-quymo-nhansu-gv.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F07-quymo-nhansu-gv.xlsx) | Danh sách nhân sự — quy mô GV (1.070 dòng) | Ban Phát triển Tổ chức - Nhân lực | Danhsach | 1 | Quy mô giảng viên | Dùng | Lọc Chức danh chứa "Giảng viên" hoặc "isb". NCS toàn thời gian được giữ (Nhóm 5). |
-| 8 | [08-donvi-giangday.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2F08-donvi-giangday.xlsx) | Mã quản lý → Đơn vị giảng dạy (949 mapping) | Ban Phát triển Tổ chức - Nhân lực | Sheet1 | 1 | Đơn vị giảng dạy | Dùng | Mapping GV Nhóm 4. |
+| 1 | [01-quymo-sinhvien-dh.xlsx](https://docs.google.com/spreadsheets/d/1MxWTw5P7nJgzSitpRNLsvx_FicWwg-Ll) | Quy mô sinh viên đại học (ĐHCQ, VLVH, CTLK) | Ban Đào tạo | Sheet1 | 3 | Quy mô sinh viên | Dùng | |
+| 2 | [02-hocphan-sotiet-2025.xlsx](https://docs.google.com/spreadsheets/d/1FHYNQ8oRCdrKDCysOhZ2bXCe94gBapF3) | Học phần & số tiết 2025 | Ban Đào tạo | Sheet 1 | 1 | Phụ lục 2. DS môn học 2025 | Dùng | Chưa có phân Khoa — ghép với file 03 theo Mã HP. |
+| 3 | [03-monhoc-khoa-phutrach.xlsx](https://docs.google.com/spreadsheets/d/1pDzKk2ftQrFUHEio8mndekQKaK4i6R-z) | Mã HP → Khoa phụ trách | Ban Đào tạo | Sheet1 | 1 | Phụ lục 2. DS môn học 2025 | Dùng | Có sẵn tên canonical "PREFIX - Khoa…". Cũng là nguồn tên đơn vị chuẩn hoá. |
+| 4 | [04-ctdt-co-phankhoa.xlsx](https://docs.google.com/spreadsheets/d/1jKE-MoFYLjr0H_epBwUjzhqoL_EAvg7I) | CTĐT có phân Khoa (146 CT) | Ban Bảo đảm chất lượng - Phát triển chương trình | Chuongtrinhdaotao | 1 | Chuongtrinhdaotao | Dùng | Mã CT khác với của Sau Đại học. Khoa/Viện có sẵn tên prefix. |
+| 5 | [05-ctdt-khong-phankhoa.xlsx](https://docs.google.com/spreadsheets/d/1JF_eqe1AmCjVcjgvSj1ilr9a5b32GIIu) | CTĐT không phân Khoa (mẫu Bộ) | Ban Sau Đại học | CTDT | 2 | — | Tham khảo | Dữ liệu CTĐT đã có đầy đủ trong file 04. |
+| 6 | [06-hocvien-ncs-sdh.xlsx](https://docs.google.com/spreadsheets/d/1mxKAiuqKtrRxJ8OPVz7hmYRpY95Y38_F) | Học viên Cao học & NCS (~9.600 dòng) | Ban Sau Đại học | HT_NCS | 2 | Quy mô SĐH | Dùng | Đếm 'Đang học' theo mã ngành (7 ký tự đầu); leading 8 = ThS, 9 = TS. |
+| 7 | [07-quymo-nhansu-gv.xlsx](https://docs.google.com/spreadsheets/d/1xJLOvv9p0rhpSK82YnJ0iMUhymonDZ0g) | Danh sách nhân sự — quy mô GV (1.070 dòng) | Ban Phát triển Tổ chức - Nhân lực | Danhsach | 1 | Quy mô giảng viên | Dùng | Lọc Chức danh chứa "Giảng viên" hoặc "isb". NCS toàn thời gian được giữ (Nhóm 5). |
+| 8 | [08-donvi-giangday.xlsx](https://docs.google.com/spreadsheets/d/1E5ZWNO7rbG-lBSbMe0wnxrK9lBTxvv4j) | Mã quản lý → Đơn vị giảng dạy (949 mapping) | Ban Phát triển Tổ chức - Nhân lực | Sheet1 | 1 | Đơn vị giảng dạy | Dùng | Mapping GV Nhóm 4. |
 
-## 2. Mapping chi tiết từng file
+---
+
+## 2. Dữ liệu đầu ra
+
+[Duthaokehoach_merged.xlsx](https://docs.google.com/spreadsheets/d/15OI6vvNjn-ci4aEHkJbAEzA5f6l09WV5) chứa 6 sheet đã được gộp & chuẩn hoá:
+
+| Sheet | Nguồn |
+|---|---|
+| Quy mô giảng viên | 07 |
+| Phụ lục 2. DS môn học 2025 | 02 + 03 |
+| Quy mô sinh viên | 01 |
+| Quy mô SĐH | 06 + 04 |
+| Đơn vị giảng dạy | 08 |
+| Chuongtrinhdaotao | 04 |
+
+---
+
+## 3. Mapping chi tiết từng file
 
 ### `01-quymo-sinhvien-dh.xlsx` → sheet **Quy mô sinh viên**
 
@@ -68,7 +84,7 @@
 
 ---
 
-## 3. Bảng tra tên đơn vị (canonical map)
+## 4. Bảng tra tên đơn vị (canonical map)
 
 Nhiều file nguồn có tên đơn vị ở dạng ngắn ("Khoa Kế toán"), trong khi format target dùng tên có prefix mã trường thành viên ("KD - Khoa Kế toán"). Pipeline quét file 03 và 08 để xây bảng tra:
 
@@ -93,18 +109,3 @@ Nhiều file nguồn có tên đơn vị ở dạng ngắn ("Khoa Kế toán"), 
 | khoa tài chính công | KTLQLNN - Khoa Tài chính công |
 | viện tài chính bền vững | KTLQLNN - Viện Tài chính bền vững |
 | khoa tài chính - ngân hàng | PHVL - Khoa Tài chính - Ngân hàng |
-
----
-
-## 4. Đầu ra cuối cùng
-
-[Duthaokehoach_merged.xlsx](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fphultk-ueh.github.io%2Fdata%2FDuthaokehoach_merged.xlsx) chứa 6 sheet đã được gộp & chuẩn hoá:
-
-| Sheet | Nguồn |
-|---|---|
-| Quy mô giảng viên | 07 |
-| Phụ lục 2. DS môn học 2025 | 02 + 03 |
-| Quy mô sinh viên | 01 |
-| Quy mô SĐH | 06 + 04 |
-| Đơn vị giảng dạy | 08 |
-| Chuongtrinhdaotao | 04 |
