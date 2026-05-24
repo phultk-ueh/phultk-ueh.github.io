@@ -242,6 +242,7 @@ function renderCharts() {
 
 function renderBarChart() {
   const ctx = document.getElementById('chart-sv-fte').getContext('2d');
+  const chuan = Number(DATA.config.constants.ty_le_sv_gv_chuan) || 40;
   const top12 = DATA.khoa_data.slice(0, 12);
   const labels = top12.map(k => shortenName(k.don_vi));
 
@@ -261,8 +262,8 @@ function renderBarChart() {
           barPercentage: 0.7,
         },
         {
-          label: 'GV Quy đổi Hiện có (×40)',
-          data: top12.map(k => k.fte_hien_co * 40),
+          label: `GV Quy đổi Hiện có (×${chuan})`,
+          data: top12.map(k => k.fte_hien_co * chuan),
           backgroundColor: 'rgba(243, 111, 50, 0.65)',
           borderColor: 'rgba(243, 111, 50, 1)',
           borderWidth: 1,
@@ -280,7 +281,7 @@ function renderBarChart() {
           callbacks: {
             label: (ctx) => {
               if (ctx.datasetIndex === 1) {
-                return `GV Quy đổi: ${(ctx.raw / 40).toFixed(1)} (capacity: ${ctx.raw.toFixed(0)} SV)`;
+                return `GV Quy đổi: ${(ctx.raw / chuan).toFixed(1)} (capacity: ${ctx.raw.toFixed(0)} SV)`;
               }
               return `SV Quy đổi: ${ctx.raw.toFixed(0)}`;
             }
@@ -297,6 +298,8 @@ function renderBarChart() {
 
 function renderRatioChart() {
   const ctx = document.getElementById('chart-ratio-khoa').getContext('2d');
+  // Đọc chuẩn SV/GV động từ config (slider cập nhật vào đây qua recalculateData)
+  const chuan = Number(DATA.config.constants.ty_le_sv_gv_chuan) || 40;
   const sorted = [...DATA.khoa_data]
     .filter(k => k.fte_hien_co > 0)
     .sort((a, b) => b.ty_le_sv_gv_hien_tai - a.ty_le_sv_gv_hien_tai)
@@ -311,14 +314,15 @@ function renderRatioChart() {
       datasets: [{
         label: 'Tỷ lệ SV/GV',
         data: sorted.map(k => k.ty_le_sv_gv_hien_tai),
+        // Màu theo ngưỡng động: > 2× chuẩn = đỏ, > chuẩn = cam, còn lại = xanh
         backgroundColor: sorted.map(k =>
-          k.ty_le_sv_gv_hien_tai > 80 ? 'rgba(214, 69, 69, 0.78)' :
-          k.ty_le_sv_gv_hien_tai > 40 ? 'rgba(243, 111, 50, 0.78)' :
+          k.ty_le_sv_gv_hien_tai > 2 * chuan ? 'rgba(214, 69, 69, 0.78)' :
+          k.ty_le_sv_gv_hien_tai > chuan ? 'rgba(243, 111, 50, 0.78)' :
           'rgba(46, 139, 111, 0.78)'
         ),
         borderColor: sorted.map(k =>
-          k.ty_le_sv_gv_hien_tai > 80 ? '#D64545' :
-          k.ty_le_sv_gv_hien_tai > 40 ? '#F36F32' :
+          k.ty_le_sv_gv_hien_tai > 2 * chuan ? '#D64545' :
+          k.ty_le_sv_gv_hien_tai > chuan ? '#F36F32' :
           '#2E8B6F'
         ),
         borderWidth: 1,
@@ -333,7 +337,7 @@ function renderRatioChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => `SV/GV: ${ctx.raw} (chuẩn ≤ 40)`
+            label: (ctx) => `SV/GV: ${ctx.raw} (chuẩn ≤ ${chuan})`
           }
         },
         annotation: undefined
@@ -354,7 +358,7 @@ function renderRatioChart() {
       afterDraw(chart) {
         const xScale = chart.scales.x;
         const yScale = chart.scales.y;
-        const x = xScale.getPixelForValue(40);
+        const x = xScale.getPixelForValue(chuan);
         const ctx = chart.ctx;
         ctx.save();
         ctx.strokeStyle = '#005D69';
@@ -366,7 +370,7 @@ function renderRatioChart() {
         ctx.stroke();
         ctx.fillStyle = '#005D69';
         ctx.font = '10px Inter';
-        ctx.fillText('Chuẩn = 40', x + 4, yScale.top + 12);
+        ctx.fillText(`Chuẩn = ${chuan}`, x + 4, yScale.top + 12);
         ctx.restore();
       }
     }]
