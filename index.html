@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dashboard Định biên Giảng viên UEH - Tính toán và phân tích nguồn nhân lực giảng viên theo chuẩn Thông tư 34">
+  <title>Định biên Giảng viên — UEH Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Đang tải dữ liệu định biên...</div>
+  </div>
+
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="header" id="header">
+      <div class="header-brand">
+        <img src="assets/ueh-logo.png" alt="UEH University" class="header-logo">
+        <div class="header-divider"></div>
+        <div class="header-titles">
+          <h1>Định biên Giảng viên</h1>
+          <p class="subtitle">Phân tích nguồn nhân lực giảng viên theo chuẩn Thông tư 34/2024/TT-BGDĐT</p>
+        </div>
+      </div>
+      <p class="date-info" id="date-info"></p>
+    </header>
+
+    <!-- Control Panel -->
+    <section class="section" id="control-panel">
+      <div class="glass-panel" style="padding: var(--space-md) var(--space-lg); margin-bottom: var(--space-lg);">
+        <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-sliders"></i> Bảng điều khiển tham số (Thời gian thực)</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg);">
+          
+          <div class="control-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <label style="font-size: 0.8rem; font-weight: 500;">Giờ Cơ hữu</label>
+              <input type="number" id="input-gio-n1" value="700" style="width: 50px; background: transparent; border: none; color: var(--accent-cyan); font-weight: 700; text-align: right; outline: none;">
+            </div>
+            <input type="range" id="slider-gio-n1" min="300" max="1000" step="10" value="700" style="width: 100%; accent-color: var(--accent-cyan);">
+          </div>
+
+          <div class="control-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <label style="font-size: 0.8rem; font-weight: 500;">Giờ Cơ hữu kiêm QL</label>
+              <input type="number" id="input-gio-n4" value="230" style="width: 50px; background: transparent; border: none; color: var(--accent-orange); font-weight: 700; text-align: right; outline: none;">
+            </div>
+            <input type="range" id="slider-gio-n4" min="100" max="500" step="10" value="230" style="width: 100%; accent-color: var(--accent-orange);">
+          </div>
+
+          <div class="control-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <label style="font-size: 0.8rem; font-weight: 500;">Chuẩn SV/GV (Toàn trường)</label>
+              <input type="number" id="input-tyle-chuan" value="40" style="width: 50px; background: transparent; border: none; color: var(--accent-green); font-weight: 700; text-align: right; outline: none;">
+            </div>
+            <input type="range" id="slider-tyle-chuan" min="15" max="60" step="1" value="40" style="width: 100%; accent-color: var(--accent-green);">
+          </div>
+          
+          <div class="control-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <label style="font-size: 0.8rem; font-weight: 500;">Định mức Hướng dẫn SĐH / TS</label>
+              <input type="number" id="input-max-sdh" value="12" style="width: 50px; background: transparent; border: none; color: var(--accent-pink); font-weight: 700; text-align: right; outline: none;">
+            </div>
+            <input type="range" id="slider-max-sdh" min="5" max="20" step="1" value="12" style="width: 100%; accent-color: var(--accent-pink);">
+          </div>
+
+          <div class="control-group">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <label style="font-size: 0.8rem; font-weight: 500;">Tỉ lệ cơ hữu (% tổng tuyển)</label>
+              <input type="number" id="input-tyle-cohuu" value="70" style="width: 50px; background: transparent; border: none; color: var(--accent-purple); font-weight: 700; text-align: right; outline: none;">
+            </div>
+            <input type="range" id="slider-tyle-cohuu" min="0" max="100" step="5" value="70" style="width: 100%; accent-color: var(--accent-purple);">
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary Cards -->
+    <section class="summary-grid" id="summary-cards">
+      <div class="summary-card cyan animate-in" id="card-sv">
+        <div class="card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="card-label">Tổng SV Quy đổi</div>
+        <div class="card-value"><span class="counter" data-target="0" id="val-sv">0</span></div>
+        <div class="card-sub" id="sub-sv">Toàn trường</div>
+      </div>
+      <div class="summary-card purple animate-in" id="card-fte">
+        <div class="card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div class="card-label">Tổng GV Quy đổi Hiện có</div>
+        <div class="card-value"><span class="counter" data-target="0" id="val-fte">0</span></div>
+        <div class="card-sub" id="sub-fte">Giảng viên quy đổi</div>
+      </div>
+      <div class="summary-card orange animate-in" id="card-ratio">
+        <div class="card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="card-label">Tỷ lệ SV/GV</div>
+        <div class="card-value"><span class="counter" data-target="0" id="val-ratio">0</span></div>
+        <div class="card-sub" id="sub-ratio">Chuẩn ≤ 40</div>
+      </div>
+      <div class="summary-card green animate-in" id="card-fte-can">
+        <div class="card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="card-label">GV Quy đổi Cần theo chuẩn</div>
+        <div class="card-value"><span class="counter" data-target="0" id="val-fte-can">0</span></div>
+        <div class="card-sub" id="sub-fte-can">Theo Thông tư 34</div>
+      </div>
+      <div class="summary-card red animate-in" id="card-tuyen">
+        <div class="card-icon"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="card-label">Tổng Đề xuất tuyển</div>
+        <div class="card-value"><span class="counter" data-target="0" id="val-tuyen">0</span></div>
+        <div class="card-sub" id="sub-tuyen">Giảng viên mới</div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-grid" id="charts-section">
+      <div class="chart-container animate-in">
+        <div class="chart-title"><i class="fa-solid fa-chart-column"></i> SV Quy đổi vs GV Quy đổi Hiện có theo Khoa</div>
+        <canvas id="chart-sv-fte"></canvas>
+      </div>
+      <div class="chart-container animate-in">
+        <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Tỷ lệ SV/GV theo Khoa (Chuẩn ≤ 40)</div>
+        <canvas id="chart-ratio-khoa"></canvas>
+      </div>
+      <div class="chart-container animate-in">
+        <div class="chart-title"><i class="fa-solid fa-user-graduate"></i> Phân bố Sinh viên theo Hệ đào tạo</div>
+        <canvas id="chart-he-dao-tao"></canvas>
+      </div>
+      <div class="chart-container animate-in">
+        <div class="chart-title"><i class="fa-solid fa-user-tie"></i> Phân bố GV theo Học hàm/Học vị</div>
+        <canvas id="chart-hoc-ham"></canvas>
+      </div>
+      <div class="chart-container animate-in">
+        <div class="chart-title"><i class="fa-solid fa-users"></i> Phân bố GV theo Nhóm</div>
+        <canvas id="chart-nhom"></canvas>
+      </div>
+    </section>
+
+    <!-- Main Data Table -->
+    <section class="section" id="table-section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon"><i class="fa-solid fa-table-list"></i></span> Bảng Định biên Chi tiết theo Đơn vị</h2>
+        <div class="controls-bar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" id="search-input" placeholder="Tìm kiếm khoa/viện...">
+          </div>
+          <button class="btn" id="btn-reset" title="Khôi phục dữ liệu gốc">
+            <i class="fa-solid fa-rotate-left"></i> Khôi phục
+          </button>
+          <button class="btn btn-primary" id="btn-export" title="Xuất CSV">
+            <i class="fa-solid fa-file-csv"></i> Xuất CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab bar for table views -->
+      <div class="tab-bar" id="tab-bar">
+        <button class="tab-btn active" data-tab="overview">Tổng quan</button>
+        <button class="tab-btn" data-tab="students">Quy mô SV</button>
+        <button class="tab-btn" data-tab="faculty">Nhân sự GV</button>
+        <button class="tab-btn" data-tab="recruitment">Đề xuất tuyển</button>
+      </div>
+
+      <p class="table-hint"><i class="fa-solid fa-pen-to-square"></i> Ô có gạch chân là dữ liệu đầu vào — bấm để chỉnh sửa và mô phỏng. Cột tính toán không cho sửa. Ô đã sửa được tô màu cam.</p>
+
+      <div class="table-wrapper" id="table-wrapper">
+        <table class="data-table" id="data-table">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section class="section" id="notes-section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon"><i class="fa-solid fa-circle-info"></i></span> Lưu ý quan trọng</h2>
+      </div>
+      <div class="glass-panel">
+        <ul class="notes-list" id="notes-list"></ul>
+      </div>
+    </section>
+
+    <!-- Config Info -->
+    <section class="section" id="config-section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon"><i class="fa-solid fa-gear"></i></span> Tham số Cấu hình</h2>
+      </div>
+      <div class="charts-grid">
+        <div class="glass-panel">
+          <div class="chart-title" style="margin-bottom: 12px;">Hệ số GV Quy đổi theo Học hàm/Học vị</div>
+          <table class="data-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Học hàm/Học vị</th>
+                <th>Hệ số GV Quy đổi</th>
+              </tr>
+            </thead>
+            <tbody id="config-fte-body"></tbody>
+          </table>
+        </div>
+        <div class="glass-panel">
+          <div class="chart-title" style="margin-bottom: 12px;">Hệ số Quy đổi Sinh viên</div>
+          <table class="data-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Hệ đào tạo</th>
+                <th>Hệ số</th>
+              </tr>
+            </thead>
+            <tbody id="config-sv-body"></tbody>
+          </table>
+        </div>
+        <div class="glass-panel">
+          <div class="chart-title" style="margin-bottom: 12px;">Phân loại Giảng viên</div>
+          <table class="data-table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Loại GV</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody id="config-nhom-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <img src="assets/ueh-logo-white.png" alt="UEH University" class="footer-logo">
+        <div class="footer-text">
+          <p class="footer-title">Dashboard Định biên Giảng viên</p>
+          <p>Dữ liệu từ Dự thảo Kế hoạch Tuyển dụng 2026–2030 • Thông tư 34/2024/TT-BGDĐT • Tỷ lệ SV/GV chuẩn ≤ 40</p>
+          <p class="footer-copy">© 2026 Đại học Kinh tế TP. Hồ Chí Minh (UEH) — Bảng điều khiển nội bộ.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
