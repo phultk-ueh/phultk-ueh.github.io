@@ -34,62 +34,21 @@ function parseEdit(text) {
 // ============================================
 // INIT
 // ============================================
-const firebaseConfig = {
-  apiKey: "AIzaSyDMeFs5kxziH2gwV8f2CqqXvH6kH1yLPbE",
-  authDomain: "dinh-bien-ueh.firebaseapp.com",
-  projectId: "dinh-bien-ueh",
-  storageBucket: "dinh-bien-ueh.firebasestorage.app",
-  messagingSenderId: "822611630177",
-  appId: "1:822611630177:web:d8b29489fd38754ef2f220"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
 document.addEventListener('DOMContentLoaded', () => {
-  const btnLogin = document.getElementById('btn-login');
-  const loginOverlay = document.getElementById('login-overlay');
-  const loginError = document.getElementById('login-error');
-
-  btnLogin.addEventListener('click', () => {
-    loginError.style.display = 'none';
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ hd: 'ueh.edu.vn' });
-    auth.signInWithPopup(provider).catch(err => {
-      loginError.style.display = 'block';
-      loginError.textContent = 'Lỗi đăng nhập: ' + err.message;
-    });
-  });
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      if (!user.email.endsWith('@ueh.edu.vn')) {
-        auth.signOut();
-        loginError.style.display = 'block';
-        loginError.textContent = 'Vui lòng sử dụng email @ueh.edu.vn';
-      } else {
-        loginOverlay.style.display = 'none';
-        loadDataFromFirebase();
-      }
-    } else {
-      loginOverlay.style.display = 'flex';
-    }
-  });
+  loadData();
 });
 
-async function loadDataFromFirebase() {
+async function loadData() {
   try {
-    const docRef = db.collection("dashboard").doc("data");
-    const docSnap = await docRef.get();
-    
-    if (docSnap.exists) {
-      DATA = docSnap.data();
+    // Ưu tiên dữ liệu nhúng sẵn từ data.js (DATA_INIT) — chạy được khi mở file://
+    if (typeof DATA_INIT !== 'undefined' && DATA_INIT) {
+      DATA = DATA_INIT;
     } else {
-      throw new Error('Không tìm thấy dữ liệu trên máy chủ. Hãy chạy script Python để đẩy dữ liệu lên Firebase.');
+      // Fallback: tải data.json (cần chạy qua web server vì fetch không hỗ trợ file://)
+      const res = await fetch('data.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status} khi tải data.json`);
+      DATA = await res.json();
     }
-    
     if (!DATA || !DATA.summary || !Array.isArray(DATA.khoa_data)) {
       throw new Error('Dữ liệu không hợp lệ (thiếu summary/khoa_data).');
     }
@@ -103,7 +62,7 @@ async function loadDataFromFirebase() {
       `<div style="color:#ef4444;text-align:center;padding:2rem;">
         <h2>Lỗi tải dữ liệu</h2>
         <p>${err.message}</p>
-        <p style="margin-top:1rem;color:#94a3b8;">Có thể bạn chưa đẩy dữ liệu lên Firebase hoặc không có quyền truy cập.</p>
+        <p style="margin-top:1rem;color:#94a3b8;">Hãy chạy <code>python3 pipeline.py</code> để sinh data.js/data.json, rồi mở lại index.html.</p>
       </div>`;
   }
 }
