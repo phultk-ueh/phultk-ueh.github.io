@@ -34,21 +34,62 @@ function parseEdit(text) {
 // ============================================
 // INIT
 // ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDMeFs5kxziH2gwV8f2CqqXvH6kH1yLPbE",
+  authDomain: "dinh-bien-ueh.firebaseapp.com",
+  projectId: "dinh-bien-ueh",
+  storageBucket: "dinh-bien-ueh.firebasestorage.app",
+  messagingSenderId: "822611630177",
+  appId: "1:822611630177:web:d8b29489fd38754ef2f220"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
 document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+  const btnLogin = document.getElementById('btn-login');
+  const loginOverlay = document.getElementById('login-overlay');
+  const loginError = document.getElementById('login-error');
+
+  btnLogin.addEventListener('click', () => {
+    loginError.style.display = 'none';
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: 'ueh.edu.vn' });
+    auth.signInWithPopup(provider).catch(err => {
+      loginError.style.display = 'block';
+      loginError.textContent = 'Lỗi đăng nhập: ' + err.message;
+    });
+  });
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      if (!user.email.endsWith('@ueh.edu.vn')) {
+        auth.signOut();
+        loginError.style.display = 'block';
+        loginError.textContent = 'Vui lòng sử dụng email @ueh.edu.vn';
+      } else {
+        loginOverlay.style.display = 'none';
+        loadDataFromFirebase();
+      }
+    } else {
+      loginOverlay.style.display = 'flex';
+    }
+  });
 });
 
-async function loadData() {
+async function loadDataFromFirebase() {
   try {
-    // Ưu tiên dữ liệu nhúng sẵn từ data.js (DATA_INIT) — chạy được khi mở file://
-    if (typeof DATA_INIT !== 'undefined' && DATA_INIT) {
-      DATA = DATA_INIT;
+    const docRef = db.collection("dashboard").doc("data");
+    const docSnap = await docRef.get();
+    
+    if (docSnap.exists) {
+      DATA = docSnap.data();
     } else {
-      // Fallback: tải data.json (cần chạy qua web server vì fetch không hỗ trợ file://)
-      const res = await fetch('data.json');
-      if (!res.ok) throw new Error(`HTTP ${res.status} khi tải data.json`);
-      DATA = await res.json();
+      throw new Error('Không tìm thấy dữ liệu trên máy chủ. Hãy chạy script Python để đẩy dữ liệu lên Firebase.');
     }
+    
     if (!DATA || !DATA.summary || !Array.isArray(DATA.khoa_data)) {
       throw new Error('Dữ liệu không hợp lệ (thiếu summary/khoa_data).');
     }
@@ -62,7 +103,7 @@ async function loadData() {
       `<div style="color:#ef4444;text-align:center;padding:2rem;">
         <h2>Lỗi tải dữ liệu</h2>
         <p>${err.message}</p>
-        <p style="margin-top:1rem;color:#94a3b8;">Hãy chạy <code>python3 pipeline.py</code> để sinh data.js/data.json, rồi mở lại index.html.</p>
+        <p style="margin-top:1rem;color:#94a3b8;">Có thể bạn chưa đẩy dữ liệu lên Firebase hoặc không có quyền truy cập.</p>
       </div>`;
   }
 }
@@ -237,12 +278,10 @@ function renderCharts() {
   renderHeDaoTaoChart();
   renderHocHamChart();
   renderNhomChart();
-  renderRecruitmentSplitChart();
 }
 
 function renderBarChart() {
   const ctx = document.getElementById('chart-sv-fte').getContext('2d');
-  const chuan = Number(DATA.config.constants.ty_le_sv_gv_chuan) || 40;
   const top12 = DATA.khoa_data.slice(0, 12);
   const labels = top12.map(k => shortenName(k.don_vi));
 
@@ -262,8 +301,8 @@ function renderBarChart() {
           barPercentage: 0.7,
         },
         {
-          label: `GV Quy đổi Hiện có (×${chuan})`,
-          data: top12.map(k => k.fte_hien_co * chuan),
+          label: 'GV Quy đổi Hiện có (×40)',
+          data: top12.map(k => k.fte_hien_co * 40),
           backgroundColor: 'rgba(243, 111, 50, 0.65)',
           borderColor: 'rgba(243, 111, 50, 1)',
           borderWidth: 1,
@@ -281,7 +320,7 @@ function renderBarChart() {
           callbacks: {
             label: (ctx) => {
               if (ctx.datasetIndex === 1) {
-                return `GV Quy đổi: ${(ctx.raw / chuan).toFixed(1)} (capacity: ${ctx.raw.toFixed(0)} SV)`;
+                return `GV Quy đổi: ${(ctx.raw / 40).toFixed(1)} (capacity: ${ctx.raw.toFixed(0)} SV)`;
               }
               return `SV Quy đổi: ${ctx.raw.toFixed(0)}`;
             }
@@ -298,8 +337,6 @@ function renderBarChart() {
 
 function renderRatioChart() {
   const ctx = document.getElementById('chart-ratio-khoa').getContext('2d');
-  // Đọc chuẩn SV/GV động từ config (slider cập nhật vào đây qua recalculateData)
-  const chuan = Number(DATA.config.constants.ty_le_sv_gv_chuan) || 40;
   const sorted = [...DATA.khoa_data]
     .filter(k => k.fte_hien_co > 0)
     .sort((a, b) => b.ty_le_sv_gv_hien_tai - a.ty_le_sv_gv_hien_tai)
@@ -314,15 +351,14 @@ function renderRatioChart() {
       datasets: [{
         label: 'Tỷ lệ SV/GV',
         data: sorted.map(k => k.ty_le_sv_gv_hien_tai),
-        // Màu theo ngưỡng động: > 2× chuẩn = đỏ, > chuẩn = cam, còn lại = xanh
         backgroundColor: sorted.map(k =>
-          k.ty_le_sv_gv_hien_tai > 2 * chuan ? 'rgba(214, 69, 69, 0.78)' :
-          k.ty_le_sv_gv_hien_tai > chuan ? 'rgba(243, 111, 50, 0.78)' :
+          k.ty_le_sv_gv_hien_tai > 80 ? 'rgba(214, 69, 69, 0.78)' :
+          k.ty_le_sv_gv_hien_tai > 40 ? 'rgba(243, 111, 50, 0.78)' :
           'rgba(46, 139, 111, 0.78)'
         ),
         borderColor: sorted.map(k =>
-          k.ty_le_sv_gv_hien_tai > 2 * chuan ? '#D64545' :
-          k.ty_le_sv_gv_hien_tai > chuan ? '#F36F32' :
+          k.ty_le_sv_gv_hien_tai > 80 ? '#D64545' :
+          k.ty_le_sv_gv_hien_tai > 40 ? '#F36F32' :
           '#2E8B6F'
         ),
         borderWidth: 1,
@@ -337,7 +373,7 @@ function renderRatioChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => `SV/GV: ${ctx.raw} (chuẩn ≤ ${chuan})`
+            label: (ctx) => `SV/GV: ${ctx.raw} (chuẩn ≤ 40)`
           }
         },
         annotation: undefined
@@ -358,7 +394,7 @@ function renderRatioChart() {
       afterDraw(chart) {
         const xScale = chart.scales.x;
         const yScale = chart.scales.y;
-        const x = xScale.getPixelForValue(chuan);
+        const x = xScale.getPixelForValue(40);
         const ctx = chart.ctx;
         ctx.save();
         ctx.strokeStyle = '#005D69';
@@ -370,7 +406,7 @@ function renderRatioChart() {
         ctx.stroke();
         ctx.fillStyle = '#005D69';
         ctx.font = '10px Inter';
-        ctx.fillText(`Chuẩn = ${chuan}`, x + 4, yScale.top + 12);
+        ctx.fillText('Chuẩn = 40', x + 4, yScale.top + 12);
         ctx.restore();
       }
     }]
@@ -467,78 +503,6 @@ function renderNhomChart() {
               return [`${ctx.label}: ${ctx.raw} (${pct}%)`, desc];
             }
           }
-        }
-      }
-    }
-  });
-}
-
-function renderRecruitmentSplitChart() {
-  const ctx = document.getElementById('chart-recruitment-split').getContext('2d');
-
-  // Lọc khoa có đề xuất tuyển > 0, sắp xếp giảm dần, top 12
-  const sorted = [...DATA.khoa_data]
-    .filter(k => (k.tong_de_xuat || 0) > 0)
-    .sort((a, b) => (b.tong_de_xuat || 0) - (a.tong_de_xuat || 0))
-    .slice(0, 12);
-
-  const labels = sorted.map(k => shortenName(k.don_vi));
-  const coHuu = sorted.map(k => k.de_xuat_co_huu || 0);
-  const dongCoHuu = sorted.map(k => k.de_xuat_dong_co_huu || 0);
-
-  if (chartInstances.recruitmentSplit) chartInstances.recruitmentSplit.destroy();
-  chartInstances.recruitmentSplit = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Cơ hữu',
-          data: coHuu,
-          backgroundColor: 'rgba(0, 93, 105, 0.85)',
-          borderColor: 'rgba(0, 93, 105, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.75,
-        },
-        {
-          label: 'Đồng cơ hữu',
-          data: dongCoHuu,
-          backgroundColor: 'rgba(243, 111, 50, 0.85)',
-          borderColor: 'rgba(243, 111, 50, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.75,
-        },
-      ]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top', labels: { padding: 14, usePointStyle: true } },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} người`,
-            footer: (items) => {
-              const total = items.reduce((s, i) => s + (i.raw || 0), 0);
-              return `Tổng tuyển: ${total} người`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          beginAtZero: true,
-          grid: { color: 'rgba(0,50,58,0.07)' },
-          ticks: { precision: 0 }
-        },
-        y: {
-          stacked: true,
-          grid: { display: false },
-          ticks: { font: { size: 10 } }
         }
       }
     }

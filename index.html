@@ -8,8 +8,22 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="index.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+  <!-- Login Overlay -->
+  <div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-main, #ffffff); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <img src="assets/ueh-logo.png" alt="UEH Logo" style="height: 80px; margin-bottom: 30px;">
+    <h2 style="margin-bottom: 10px; color: var(--text-main, #333);">Định Biên Giảng Viên</h2>
+    <p style="margin-bottom: 30px; color: var(--text-secondary, #666);">Hệ thống lưu trữ bảo mật. Vui lòng đăng nhập bằng Email @ueh.edu.vn</p>
+    <button id="btn-login" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; background: var(--accent-cyan, #007bff); color: white; border: none; font-weight: bold;"><i class="fa-brands fa-google" style="margin-right: 8px;"></i> Đăng nhập bằng Google</button>
+    <div id="login-error" style="color: #ff3b30; margin-top: 20px; display: none; background: rgba(255,59,48,0.1); padding: 10px; border-radius: 6px; max-width: 400px; text-align: center;"></div>
+  </div>
 
   <!-- Loading Screen -->
   <div id="loading-screen" class="loading-screen">
@@ -123,7 +137,7 @@
         <canvas id="chart-sv-fte"></canvas>
       </div>
       <div class="chart-container animate-in">
-        <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Tỷ lệ SV/GV theo Khoa</div>
+        <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Tỷ lệ SV/GV theo Khoa (Chuẩn ≤ 40)</div>
         <canvas id="chart-ratio-khoa"></canvas>
       </div>
       <div class="chart-container animate-in">
@@ -137,10 +151,6 @@
       <div class="chart-container animate-in">
         <div class="chart-title"><i class="fa-solid fa-users"></i> Phân bố GV theo Nhóm</div>
         <canvas id="chart-nhom"></canvas>
-      </div>
-      <div class="chart-container animate-in">
-        <div class="chart-title"><i class="fa-solid fa-user-plus"></i> Đề xuất tuyển theo Khoa — Cơ hữu vs Đồng cơ hữu</div>
-        <canvas id="chart-recruitment-split"></canvas>
       </div>
     </section>
 
@@ -248,7 +258,6 @@
     </footer>
   </div>
 
-  <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
